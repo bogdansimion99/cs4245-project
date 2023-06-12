@@ -33,7 +33,7 @@
 
 ## Methodology
 
-###
+### In this section we would like to discuss the algorithms used in our implementation, along with the necessary explanations.
 
 ![VGG16 Architecture](https://github.com/bogdansimion99/cs4245-project/blob/main/docs/assets/VGG16_Architecture.jpg)
 
