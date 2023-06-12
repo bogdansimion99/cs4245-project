@@ -6,10 +6,18 @@
 #### Alexandru Bobe: 5069831
 #### Bogdan Simion: 5850185
 #### Onno Verberne: 5883407
-
              
 ### This project was done in part to satisfy the requirements for the Seminar Computer Vision by Deep Learning course at TU Delft.
 ### We aim to reproduce and to improve some parts of the paper "TenniSet: A Dataset for Dense Fine-Grained Event Recognition, Localisation and Description". In this blog we’ll be elaborating on our efforts to reproduce the results, the issues we faced and the discussion about the possibility of reproducing the paper.
+
+## Table of Contents  
+**[Introduction](#Introduction)**<br>
+**[Previous work](#Previous-work)**<br>
+**[Project goals](#Project-goals)**<br>
+**[Methodology](#Methodology)**<br>
+**[Results](#Results)**<br>
+**[Issues](#Issues)**<br>
+**[Discussions](#Discussions)**<br>
 
 ## Introduction
 
