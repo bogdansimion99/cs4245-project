@@ -47,13 +47,29 @@
 
 #### First of all, we need to convert from video to frames using Python's specialized computer vision library: OpenCV. We set to have 50 frames per second as this number was the most compatible with all the algorithms used in our implementation. In short, it reads each frame of the video, checks for any errors in frame reading, and saves the valid frames as individual image files. The total count of saved frames is then printed. After creating the images, we need to save them into a more organised dataset. Therefore, we created TennisDataset for working with tennis-related image data and it is designed to be compatible with PyTorch's dataset interface. One throwback we saw during training is that the classes are imbalanced, so we undersampled the dataset to address this. Undersampling involves reducing the number of instances of the most frequent class to match the frequency of the second most frequent class.
 
+#### Some of the frames
+
 ### VGG16
+
+#### The VGG16 architecture consists of a series of convolutional layers, followed by fully connected layers. It is named "VGG16" because it has 16 weight layers, including 13 convolutional layers and 3 fully connected layers. The convolutional layers are designed to extract hierarchical features from the input images, while the fully connected layers act as a classifier to predict the class labels.
+
+#### Each convolutional layer in VGG16 applies a set of learnable filters to the input image. These filters capture different aspects of the image, such as edges, textures, and shapes. The filters are small in spatial dimension but extend across the full depth of the input volume, enabling the model to learn rich spatial representations.
+
+#### In VGG16, the convolutional layers are stacked on top of each other, with occasional max pooling layers in between. The max pooling layers downsample the spatial dimensions of the feature maps, reducing the computational complexity and increasing the receptive field of the subsequent layers.
+
+#### The fully connected layers in VGG16 take the output of the last convolutional layer, flatten it into a 1-dimensional vector, and process it through a series of densely connected layers. The final fully connected layer produces the output predictions by employing a softmax activation function, which assigns probabilities to each class label.
+
+#### During the training phase, VGG16 is typically trained using the backpropagation algorithm with gradient descent optimization. The weights of the network are updated iteratively to minimize a loss function, such as categorical cross-entropy, by comparing the predicted probabilities with the ground truth labels.
 
 ![Alt Text](./assets/VGG16_Architecture.png)
 
 ### Optical Flow
 
-### Network Distilation
+#### Optical flow refers to the pattern of apparent motion of objects in a sequence of images or video frames. It provides valuable information about the movement of objects and can be used for various computer vision tasks, such as object tracking, motion analysis, and video stabilization. To compute optical flow, we leverage the assumption that pixel intensities of objects in consecutive frames tend to remain constant unless affected by motion. Based on this assumption, several algorithms have been developed to estimate the motion vectors of pixels between frames.
+
+#### More recently, deep learning-based methods have been developed to estimate optical flow. These approaches utilize convolutional neural networks (CNNs) to learn complex motion patterns and capture long-range dependencies. Networks like FlowNet and PWC-Net have achieved state-of-the-art performance in optical flow estimation by training on large-scale annotated datasets. In our study, we use optical flow as a key component in our methodology to analyze and track the motion of players and tennis balls in our tennis dataset.
+
+### Network Distillation
 
 ## Results
 
