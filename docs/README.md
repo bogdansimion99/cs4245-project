@@ -51,7 +51,7 @@
 
 ![Labels](./assets/Labels.png)
 
-#### For a better insight, we will show above a sample from every label. Note that the OTH label is by far the most frequent label, counting for more than 80% of all images.
+#### For a better insight, we will show below a sample from every label. Note that the OTH label is by far the most frequent label, counting for more than 80% of all images.
 
 ### VGG16
 
