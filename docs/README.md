@@ -51,6 +51,8 @@
 
 ![Labels](./assets/Labels.png)
 
+#### For a better insight, we will show above a sample from every label. Note that the OTH label is by far the most frequent label, counting for more than 80% of all images.
+
 ### VGG16
 
 #### The VGG16 architecture consists of a series of convolutional layers, followed by fully connected layers. It is named "VGG16" because it has 16 weight layers, including 13 convolutional layers and 3 fully connected layers. The convolutional layers are designed to extract hierarchical features from the input images, while the fully connected layers act as a classifier to predict the class labels.
