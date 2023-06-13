@@ -69,9 +69,9 @@
 <img src="./assets/1783.png" width="400"> -->
 
 <p float="left">
-  <img src="./assets/1783.png" width="330" />
-  <img src="./assets/11161.png" width="330" /> 
-  <img src="./assets/10871.png" width="330" />
+  <img src="./assets/1783.png" width="200" />
+  <img src="./assets/11161.png" width="200" /> 
+  <img src="./assets/10871.png" width="200" />
 </p>
 
 ### VGG16
