@@ -51,7 +51,19 @@
 
 ![Labels](./assets/Labels.png)
 
-#### For a better insight, we will show below a sample from every label. Note that the OTH label is by far the most frequent label, counting for more than 80% of all images.
+#### For a better insight, we will show below a sample from every label. Note that the OTH label is by far the most frequent label, counting for more than 80% of all images. The labels are, in order: OTH, SFI, SFF, SFL, SNI, SNF, SNL, HFL, HFR, HNL and respectively HNR.
+
+![OTH](./assets/1783.png)
+![SFI](./assets/11161.png)
+![SFF](./assets/10871.png)
+![SFL](./assets/13024.png)
+![SNI](./assets/1967.png)
+![SNF](./assets/6815.png)
+![SNL](./assets/30021.png)
+![HFL](./assets/2777.png)
+![HFR](./assets/2004.png)
+![HNL](./assets/2090.png)
+![HNR](./assets/2025.png)
 
 ### VGG16
 
