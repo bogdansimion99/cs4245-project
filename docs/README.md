@@ -47,7 +47,9 @@
 
 #### First of all, we need to convert from video to frames using Python's specialized computer vision library: OpenCV. We set to have 50 frames per second as this number was the most compatible with all the algorithms used in our implementation. In short, it reads each frame of the video, checks for any errors in frame reading, and saves the valid frames as individual image files. The total count of saved frames is then printed. After creating the images, we need to save them into a more organised dataset. Therefore, we created TennisDataset for working with tennis-related image data and it is designed to be compatible with PyTorch's dataset interface. One throwback we saw during training is that the classes are imbalanced, so we undersampled the dataset to address this. Undersampling involves reducing the number of instances of the most frequent class to match the frequency of the second most frequent class.
 
-#### Some of the frames
+#### In total, there are 11 labels we assign to the frames, and they are explained better in the following screenshot from the Tenniset [^4] Github page.
+
+![Labels](./assests/Labels.png)
 
 ### VGG16
 
@@ -78,9 +80,11 @@
 #### a
 
 ## Issues
-#### a
+
+#### Imbalanced classes
 
 ## Discussion
+
 #### a
 
 ## References
