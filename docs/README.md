@@ -69,9 +69,17 @@
 <img src="./assets/1783.png" width="400"> -->
 
 <p float="left">
-  <img src="./assets/1783.png" width="200" />
-  <img src="./assets/11161.png" width="200" /> 
-  <img src="./assets/10871.png" width="200" />
+  <img src="./assets/1783.png" width="250" />
+  <img src="./assets/11161.png" width="250" /> 
+  <img src="./assets/10871.png" width="250" />
+  <img src="./assets/13024.png" width="250" />
+  <img src="./assets/1967.png" width="250" /> 
+  <img src="./assets/6815.png" width="250" />
+  <img src="./assets/30021.png" width="250" />
+  <img src="./assets/2777.png" width="250" /> 
+  <img src="./assets/2004.png" width="250" />
+  <img src="./assets/2090.png" width="250" />
+  <img src="./assets/2025.png" width="250" /> 
 </p>
 
 ### VGG16
