@@ -49,7 +49,7 @@
 
 #### In total, there are 11 labels we assign to the frames, and they are explained better in the following screenshot from the Tenniset [^4] Github page.
 
-![Labels](./assests/Labels.png)
+![Labels](./assets/Labels.png)
 
 ### VGG16
 
