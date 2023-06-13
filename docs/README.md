@@ -53,7 +53,7 @@
 
 #### For a better insight, we will show below a sample from every label. Note that the OTH label is by far the most frequent label, counting for more than 80% of all images. The labels are, in order: OTH, SFI, SFF, SFL, SNI, SNF, SNL, HFL, HFR, HNL and respectively HNR.
 
-![OTH](./assets/1783.png | width = 50)
+<!-- ![OTH](./assets/1783.png | width = 50)
 ![SFI](./assets/11161.png | width = 50)
 ![SFF](./assets/10871.png | width = 50)
 ![SFL](./assets/13024.png | width = 50)
@@ -63,7 +63,16 @@
 ![HFL](./assets/2777.png | width = 50)
 ![HFR](./assets/2004.png | width = 50)
 ![HNL](./assets/2090.png | width = 50)
-![HNR](./assets/2025.png | width = 50)
+![HNR](./assets/2025.png | width = 50) -->
+
+<!-- <img src="./assets/1783.png" width="400">
+<img src="./assets/1783.png" width="400"> -->
+
+<p float="left">
+  <img src="./assets/1783.png" width="330" />
+  <img src="./assets/11161.png" width="330" /> 
+  <img src="./assets/10871.png" width="330" />
+</p>
 
 ### VGG16
 
