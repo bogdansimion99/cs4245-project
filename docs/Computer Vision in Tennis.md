@@ -37,13 +37,11 @@ From the outset of our project, we recognized that the scope of our work would h
 
 The contribution of Mora [^5] to the field of Computer Vision applied to tennis is significant. She presents a comprehensive framework for in-play tennis analysis using computer vision for object detection, motion tracking, and player tracking. Using these techniques, the system offered an innovative approach to analyzing in-play tennis events, providing a deeper understanding of player movements, shot recognition, and other relevant aspects of the game. Afterwards, we explored how we can also achieve the same results and maybe even improve them by using the more recent developments in the field.
 
-![Tracking players and ball](./assets/tracking.png)
+<img src="./assets/tracking.png" width="640" height="360" title="tracking"/>
 
 The first logical step was to understand how to track the ball. The paper by Huang et al. [^2] introduces TrackNet, a deep learning network specifically designed for tracking high-speed and small objects in sports applications. This work addresses the challenges associated with tracking objects such as balls or players in fast-paced sports scenarios, where objects can be both small in size and rapidly moving.
 
 The second step was to find how we can track the players. Of course, all the iterations of the YOLO [^6] model were good candidates for our system, but we wanted to check if there are more task-specific models. While looking for a better alternative, we found a completely different solution proposed by Faulkner et al. [^4]. Instead of tracking the players and the ball with bounding boxes and later analyse their positions for getting insights, Faulkner *skipped* the step of tracking and went directly to action detection by analysing the frames of the video. Using this technique, they were able to perform frame classification, event detection and recognition and automatic commentary generation. Moreover, compared to most other papers, the dataset was publicly available and it was possible to reproduce the results.   
-
-
 
 
 
@@ -87,38 +85,10 @@ The frames are part of 11 classes, meaning
 </p>
 
 
-### Flownet
+### VGG16
 
 
-<!-- ### Creating the dataset
 
-#### First of all, we need to convert from video to frames using Python's specialized computer vision library: OpenCV. We set to have 50 frames per second as this number was the most compatible with all the algorithms used in our implementation. In short, it reads each frame of the video, checks for any errors in frame reading, and saves the valid frames as individual image files. The total count of saved frames is then printed. After creating the images, we need to save them into a more organised dataset. Therefore, we created TennisDataset for working with tennis-related image data and it is designed to be compatible with PyTorch's dataset interface. One throwback we saw during training is that the classes are imbalanced, so we undersampled the dataset to address this. Undersampling involves reducing the number of instances of the most frequent class to match the frequency of the second most frequent class. -->
-
-<!-- #### In total, there are 11 labels we assign to the frames, and they are explained better in the following screenshot from the Tenniset [^4] Github page.
- -->
-<!-- ![Labels](./assets/Labels.png)
-
-#### For a better insight, we will show below a sample from every label. Note that the OTH label is by far the most frequent label, counting for more than 80% of all images. The labels are, in order: OTH, SFI, SFF, SFL, SNI, SNF, SNL, HFL, HFR, HNL and respectively HNR. -->
-
-<!--  -->
-
-<!-- <img src="./assets/1783.png" width="400">
-<img src="./assets/1783.png" width="400"> -->
-
-<!-- <p float="left">
-  <img src="./assets/1783.png" width="220" />
-  <img src="./assets/11161.png" width="220" /> 
-  <img src="./assets/10871.png" width="220" />
-  <img src="./assets/13024.png" width="220" />
-  <img src="./assets/1967.png" width="220" /> 
-  <img src="./assets/6815.png" width="220" />
-  <img src="./assets/30021.png" width="220" />
-  <img src="./assets/2777.png" width="220" /> 
-  <img src="./assets/2004.png" width="220" />
-  <img src="./assets/2090.png" width="220" />
-  <img src="./assets/2025.png" width="220" /> 
-</p>
- -->
 <!-- ### VGG16
 
 #### The VGG16 architecture consists of a series of convolutional layers, followed by fully connected layers. It is named "VGG16" because it has 16 weight layers, including 13 convolutional layers and 3 fully connected layers. The convolutional layers are designed to extract hierarchical features from the input images, while the fully connected layers act as a classifier to predict the class labels. -->
