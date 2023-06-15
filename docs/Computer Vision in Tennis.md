@@ -16,9 +16,8 @@ We aim to reproduce and to improve some parts of the paper "TenniSet: A Dataset 
 ## Table of Contents  
 **[Introduction](#Introduction)**<br>
 **[Previous work](#Previous-work)**<br>
-**[Project goals](#Project-goals)**<br>
 **[Methodology](#Methodology)**<br>
-**[Results](#Results)**<br>
+**[Experiments & Results](#Experiments&Results)**<br>
 **[Issues](#Issues)**<br>
 **[Discussions](#Discussions)**<br>
 
@@ -61,7 +60,7 @@ The frames are part of 11 classes, meaning
 * second letter: Far or Near, depending where the player is positioned in the frame 
 * last letter: has multiple options, explained in the figure:
  
- ![Classes](./assets/Labels.png)
+ ![Classes](./assets/tennis_cls.svg)
 
 
 <p float="left">
@@ -84,51 +83,41 @@ The frames are part of 11 classes, meaning
   <img src="./assets/2025.png" width="220" title="HNR"/> 
 </p>
 
+In order to improve the performance of the model we performed the following transformations, as explained in the paper.
+* Center Crop (as most information is in the middle of the frame)
+* Resizing to 512x512
+* Mean subtraction
+
+We note that the official repository has additional transformations that are not presented in the paper that might have influenced the presented accuracies.
 
 ### VGG16
+The paper uses as a baseline a VGG16 architecture with a decreased number of neurons for the last dense layer(256) and a single dense layer instead of two, since they claim it has no negative effect on the performance. Throughout the whole paper, the criterion used is the Cross-Entropy Loss. 
 
-
-
-<!-- ### VGG16
-
-#### The VGG16 architecture consists of a series of convolutional layers, followed by fully connected layers. It is named "VGG16" because it has 16 weight layers, including 13 convolutional layers and 3 fully connected layers. The convolutional layers are designed to extract hierarchical features from the input images, while the fully connected layers act as a classifier to predict the class labels. -->
-
-<!-- #### Each convolutional layer in VGG16 applies a set of learnable filters to the input image. These filters capture different aspects of the image, such as edges, textures, and shapes. The filters are small in spatial dimension but extend across the full depth of the input volume, enabling the model to learn rich spatial representations. -->
-
-<!-- #### In VGG16, the convolutional layers are stacked on top of each other, with occasional max pooling layers in between. The max pooling layers downsample the spatial dimensions of the feature maps, reducing the computational complexity and increasing the receptive field of the subsequent layers. -->
-
-<!-- #### The fully connected layers in VGG16 take the output of the last convolutional layer, flatten it into a 1-dimensional vector, and process it through a series of densely connected layers. The final fully connected layer produces the output predictions by employing a softmax activation function, which assigns probabilities to each class label. -->
-
-<!-- #### During the training phase, VGG16 is typically trained using the backpropagation algorithm with gradient descent optimization. The weights of the network are updated iteratively to minimize a loss function, such as categorical cross-entropy, by comparing the predicted probabilities with the ground truth labels. -->
-
-<!-- ![VGG16 Architecture](./assets/VGG16_Architecture.png) -->
-
-<!-- ### Optical Flow
-
-#### Optical flow refers to the pattern of apparent motion of objects in a sequence of images or video frames. It provides valuable information about the movement of objects and can be used for various computer vision tasks, such as object tracking, motion analysis, and video stabilization. To compute optical flow, we leverage the assumption that pixel intensities of objects in consecutive frames tend to remain constant unless affected by motion. Based on this assumption, several algorithms have been developed to estimate the motion vectors of pixels between frames. -->
-
-<!-- #### More recently, deep learning-based methods have been developed to estimate optical flow. These approaches utilize convolutional neural networks (CNNs) to learn complex motion patterns and capture long-range dependencies. Networks like FlowNet and PWC-Net have achieved state-of-the-art performance in optical flow estimation by training on large-scale annotated datasets. In our study, we use optical flow as a key component in our methodology to analyze and track the motion of players and tennis balls in our tennis dataset. -->
-
-<!-- ![Optical Flow Architecture](./assets/Optical_Flow_Architecture.png) -->
+![VGG16 Architecture](./assets/VGG16_Architecture.png)
 
 ### Optical flow
-In the 2017 paper by Faulkner et al. they demonstrate that the inclusion of optical flow data increases their models performance. The inclusion of motion information seems logically and empirically important for clasification of tennis videos. However, the optical flow model FlowNet [^7] dates back to 2015 and is quite slow, not ideal for real-time calculation. Over the years much more efficient models have been created, namely PWC-net [^8] by Nvidia and RAFT [^9] are two strong competitors. We have opted to use the latter RAFT as there is an existing easy to use pretrained pytorch implementation.
+In the 2017 paper by Faulkner et al. they demonstrate that the inclusion of optical flow data increases their models' performance. The inclusion of motion information seems logically and empirically important for classification of tennis videos. However, the optical flow model FlowNet [^7] dates back to 2015 and is quite slow, not ideal for real-time calculation. Over the years much more efficient models have been created, namely PWC-net [^8] by Nvidia and RAFT [^9] are two strong competitors. We have opted to use the latter RAFT as there is an existing easy to use pretrained pytorch implementation.
 
 #### Two-Stream
-In addition to the pure optical flow model, Faulkner et al. also proposed a two-stream model, where a standard VGG16 model and an optical flow VGG16 model have their features joined as they are passed into the classifier part of VGG16. This model saw the the greatest performance across the board.
+In addition to the pure optical flow model, Faulkner et al. also proposed a two-stream model, where a standard VGG16 model and an optical flow VGG16 model have their features joined as they are passed into the classifier part of VGG16. This model saw the greatest performance across the board.
 
-### Network Distillation
-TODO: Big cumbersome network, make it smaller via student teacher or craft distillation
+### Knowledge Distillation
+In order to make the process more affordable for everyone and maybe achieve real-time analysis, we had to integrate our system into a cheaper network that doesn't take as much time and resources to predict. A natural step towards this goal was knowledge distillation [^10]. Since VGG16 is known for its deep architecture, we wanted to use a smaller network, called MobileNet with around 5M parameters, compared to the more than 100M in VGG16. In order to perform knowledge distillation, we used the teacher-student training loop, illustrated below:
 
-## Results
+![Teacher-Student](./assets/teacher-student.png)
+<!-- TODO - Alex: Teacher-student with mobilenet_v3_large as student and VGG16 as teacher -->
+<!-- TODO: Big cumbersome network, make it smaller via student teacher or craft distillation
+ -->
+## Experiments & Results
 
 #### a
 
 ## Issues
+<!-- Maybe we can write these our experiments section? -->
 TODO: comparatively low computation power, runs taking very very long, lots of data so online is harder, running out of memory issues too
-#### Imbalanced classes
 
-## Discussion
+
+## Conclusion and Future Work
 
 #### a
 
@@ -143,3 +132,4 @@ TODO: comparatively low computation power, runs taking very very long, lots of d
 [^7]: Dosovitskiy, A., Fischer, P., Ilg, E., Häusser, P., Hazirbas, C., Golkov, V., van der Smagt, P., Cremers, D., & Brox, T. (2015). FlowNet: Learning Optical Flow with Convolutional Networks. 2015 IEEE International Conference on Computer Vision (ICCV), 2758-2766.
 [^8]: Sun, D., Yang, X., Liu, M., & Kautz, J. (2017). PWC-Net: CNNs for Optical Flow Using Pyramid, Warping, and Cost Volume. 2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition, 8934-8943.
 [^9]: Teed, Z., & Deng, J. (2020). RAFT: Recurrent All-Pairs Field Transforms for Optical Flow. European Conference on Computer Vision.
+[^10]: Hinton, G., Vinyals, O., & Dean, J. (2015). Distilling the knowledge in a neural network. arXiv preprint arXiv:1503.02531.
