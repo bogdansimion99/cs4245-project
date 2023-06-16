@@ -60,7 +60,7 @@ The frames are part of 11 classes, meaning
 * second letter: Far or Near, depending where the player is positioned in the frame 
 * last letter: has multiple options, explained in the figure:
  
- ![Classes](./assets/Labels.svg)
+ ![Classes](./assets/Labels.png)
 
 
 <p float="left">
