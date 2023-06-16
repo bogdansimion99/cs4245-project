@@ -140,15 +140,14 @@ From the graphs below it can be seen that none of the schedulers significantly r
 
 * PolynomialLR (Power = 2)
 
-![PolynomialLR](./assets/PolynomialvsBase.svg)
+ <img src="./assets/PolynomialvsBase.svg" width="300" height="150" title="PolynomialLR"/> 
 
 
 * StepLR (step_size = 1, gamma=0.1)
 
-![StepLR](./assets/StepvsBase.svg)
+<img src="./assets/StepvsBase.svg" width="300" height="150" title="StepLR"/> 
 
-![StepPolyBase](./assets/Stepvspolyvsbase.svg)
-
+<img src="./assets/Stepvspolyvsbase.svg" width="300" height="150" title="StepPolyBase"/> 
 
 
 GRAPHS OF TRAIN LOSS AND VAL ACCURACY (ALMOST FINISHED RUNNING)
