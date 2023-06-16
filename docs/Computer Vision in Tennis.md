@@ -139,7 +139,8 @@ Furthermore, the high variance in the training loss stood out to us, we conjectu
 From the graphs below it can be seen that none of the schedulers significantly reduce the variance in the training loss, thus disproving our learning rate hypothesis. Although an initial boost in validation performance is observed, the base model outperforms every scheduler after five epochs.
 
 * PolynomialLR (Power = 2)
-![PolynomialLR](./assets/Polynomial vs Base.svg)
+
+![PolynomialLR](./assets/PolynomialvsBase.svg)
 
 
 * StepLR (step_size = 1, gamma=0.1)
