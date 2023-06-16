@@ -17,9 +17,8 @@ We aim to reproduce and to improve some parts of the paper "TenniSet: A Dataset 
 **[Introduction](#Introduction)**<br>
 **[Previous work](#Previous-work)**<br>
 **[Methodology](#Methodology)**<br>
-**[Experiments & Results](#Experiments&Results)**<br>
-**[Issues](#Issues)**<br>
-**[Discussions](#Discussions)**<br>
+**[Experiments & Results](#Experiments & Results)**<br>
+**[Conclusion and Future Work](#Conclusion and Future Works)**<br>
 
 ## Introduction
 
