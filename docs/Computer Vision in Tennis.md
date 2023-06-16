@@ -99,7 +99,7 @@ The paper uses as a baseline a VGG16 architecture with a decreased number of neu
 In the 2017 paper by Faulkner et al. they demonstrate that the inclusion of optical flow data increases their models' performance. The inclusion of motion information seems logically and empirically important for classification of tennis videos. However, the optical flow model FlowNet [^7] dates back to 2015 and is quite slow, not ideal for real-time calculation. Over the years much more efficient models have been created, namely PWC-net [^8] by Nvidia and RAFT [^9] are two strong competitors. We have opted to use the latter RAFT as there is an existing easy to use pretrained pytorch implementation.
 
 #### Two-Stream
-In addition to the pure optical flow model, Faulkner et al. also proposed a two-stream model, where a standard VGG16 model and an optical flow VGG16 model have their features joined as they are passed into the classifier part of VGG16. This model saw the greatest performance across the board.
+In addition to the pure optical flow model, Faulkner et al. also proposed a two-stream model, where a standard VGG16 model and an optical flow VGG16 model have their features joined as they are passed into the classifier part of VGG16. This model saw the greatest performance across the board, at the cost of doubling the number of parameters.
 
 ### Knowledge Distillation
 In order to make the process more affordable for everyone and maybe achieve real-time analysis, we had to integrate our system into a cheaper network that doesn't take as much time and resources to predict. A natural step towards this goal was knowledge distillation [^10]. Since VGG16 is known for its deep architecture, we wanted to use a smaller network, called MobileNet with around 5M parameters, compared to the more than 100M in VGG16. In order to perform knowledge distillation, we used the teacher-student training loop, illustrated below:
@@ -108,14 +108,53 @@ In order to make the process more affordable for everyone and maybe achieve real
 <!-- TODO - Alex: Teacher-student with mobilenet_v3_large as student and VGG16 as teacher -->
 <!-- TODO: Big cumbersome network, make it smaller via student teacher or craft distillation
  -->
+
+#### Craft Distillation
+Another novel approach to model compression is craft distillation [^11], where a network is compressed layer by layer. A convolutional block (e.g. convolution + normalization + activation) is replaced by two or more separable convolution [^12] blocks. Eventhough a single block is replaced by two separable blocks, the number of parameters is still reduced. The distillation process is then as follows:
+
+1. Select a convolutional block to replace
+2. Train a student block on the input and output features of the "teacher" block using a regression loss such as MSE.
+3. Replace the teacher with the student.
+4. Do fine-tuning on the entire model using the cross entropy loss
+5. Repeat for the other convolutional blocks.
+
+### Learning rate scheduling
+During training the loss can vary wildly, possibly caused by gradient steps being too large. To combat this issue we opted to use four different learning rate schedulers: Step-wise, Linear, Reduce on pleateau, and Cosine Annealing With Warm Restarts [^13]. The linear scheduler is chosen as it starts with a lower learning rate which anneals over time. Starting slower could prevent the model from overshooting the local optimum induced by the pre-trained weights. By the same token, cosine annealing with warm restarts has been shown to increase the convergence speed of deep CNNs and could help reduce the training loss variance over time.
+
 ## Experiments & Results
+To determine the efficacy our proposed improvements to the TenniSet paper we first had to reproduce their results. However, shortly into the project we found out just how much storage and compute was required. The smallest video in the dataset, video 8, at 54 minutes in length and about 1 GiB in size ended up being over 20 GiB after frame extraction. This made it very difficult to run the experiments on Google Colab, and we had run the experiments locally. On our own hardware the training time of 1 model sometimes exceeded 7 hours. Thus, after the initial experiments we have limited ourselves to the base pre-trained VGG16 model due to memory and time constraints.
 
-#### a
+### Model Comparisons
+The results of the accuracy on the training and validation sets are found in the table below. We have also included the confusion matrices on the validation set of each model as heatmaps. From the results in the table below it can be observed that the base model has an accuracy of 50%, a 15 percentage point reduction w.r.t the reported accuracy by Faulkner et al. [^4]. Interestingly, the inclusion of optical flow data had a negative effect on classification performance. The optical flow model saw a 36% reduction in relative accuracy to the base model on the validation set, similar to only optimizing the classifier section of VGG16. Additionally, the two-stream model performed no better than the base VGG16 model. We hypothesise that the pre-trained weights in conjunction with the low amount of training data made it hard for the models to generalize much beyond their pre-trained performance, as similar to Faulkner et al. each component is optimized ore pre-trained before being joined for end-to-end training.
 
-## Issues
+TABLE OF TRAIN/VAL ACCURACIES FOR: RGB, RGB CLASSIFIER ONLY, OF, TWO-STREAM + CONFUSION MATRICES
+
+In the graphs below, it can be seen that for the base and two-stream models the training loss is converging to a local optimum, whereas the loss of the optical flow and classifier only models stagnates right from the start. This fact is also reflected in the validation accuracies. Our hypothesis for the behaviour of the optical flow model is similar to our previous hypothesis: the global optimum for the optical flow model is likely so far away from its current local optimum, induced by the pre-trained weights, that it is very hard to escape it with so little data.
+
+GRAPHS OF TRAIN LOSS AND VAL ACCURACY (I ALREADY HAVE THESE)
+
+Furthermore, the high variance in the training loss stood out to us, we conjectured two causes for this. Firstly, the class imbalance causes the model to overfit on the more prevalent classes, as a novel class sample will then cause the loss to greatly increase. Secondly, we propose that the learning rate requires more tuning as the variance in training losses could indicate that the gradient steps are too large.
+
+### Learning rate scheduling
+From the graphs below it can be seen that none of the schedulers significantly reduce the variance in the training loss, thus disproving our learning rate hypothesis. Although an initial boost in validation performance is observed, the base model outperforms every scheduler after five epochs.
+
+* PolynomialLR (Power = 2)
+![PolynomialLR](./assets/Polynomial vs Base.svg)
+
+
+* StepLR (step_size = 1, gamma=0.1)
+
+
+GRAPHS OF TRAIN LOSS AND VAL ACCURACY (ALMOST FINISHED RUNNING)
+
+### Network Distillation
+Network distillation yielded no positive results. [@Alexandru you can put your results on teacher-student here]. Likewise, the craft distillation lost all of its accuracy after just one epoch. In the confusion matrices below it can be seen that after one round of distillation all model outputs belonged to the two most prevalent classes. After the second layer had been distilled and refined the model only output the most prevalent class.
+
+HEATMAP OF CONFUSION MATRIX
+
+<!-- ## Issues
 <!-- Maybe we can write these our experiments section? -->
-TODO: comparatively low computation power, runs taking very very long, lots of data so online is harder, running out of memory issues too
-
+<!-- TODO: comparatively low computation power, runs taking very very long, lots of data so online is harder, running out of memory issues too -->
 
 ## Conclusion and Future Work
 
@@ -133,3 +172,6 @@ TODO: comparatively low computation power, runs taking very very long, lots of d
 [^8]: Sun, D., Yang, X., Liu, M., & Kautz, J. (2017). PWC-Net: CNNs for Optical Flow Using Pyramid, Warping, and Cost Volume. 2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition, 8934-8943.
 [^9]: Teed, Z., & Deng, J. (2020). RAFT: Recurrent All-Pairs Field Transforms for Optical Flow. European Conference on Computer Vision.
 [^10]: Hinton, G., Vinyals, O., & Dean, J. (2015). Distilling the knowledge in a neural network. arXiv preprint arXiv:1503.02531.
+[^11]: C. Blakeney, X. Li, Y. Yan and Z. Zong, "Craft Distillation: Layer-wise Convolutional Neural Network Distillation," 2020 7th IEEE International Conference on Cyber Security and Cloud Computing (CSCloud)/2020 6th IEEE International Conference on Edge Computing and Scalable Cloud (EdgeCom), New York, NY, USA, 2020, pp. 252-257, doi: 10.1109/CSCloud-EdgeCom49738.2020.00051.
+[^12]: Guo, Y., Li, Y., Feris, R.S., Wang, L., & Simunic, T. (2019). Depthwise Convolution is All You Need for Learning Multiple Visual Domains. AAAI Conference on Artificial Intelligence.
+[^13]: Loshchilov, I., & Hutter, F. (2016). SGDR: Stochastic Gradient Descent with Restarts. ArXiv, abs/1608.03983.
