@@ -11,7 +11,7 @@
 #### This project was done in part to satisfy the requirements for the Seminar Computer Vision by Deep Learning course at TU Delft.
 ----
 
-We aim to reproduce and to improve some parts of the paper "TenniSet: A Dataset for Dense Fine-Grained Event Recognition, Localisation and Description". In this blog we’ll be elaborating on our efforts to reproduce the results, the issues we faced and the discussion about possible future work that builds on it.
+We aim to reproduce and improve some parts of the paper "TenniSet: A Dataset for Dense Fine-Grained Event Recognition, Localisation and Description". In this blog we’ll be elaborating on our efforts to reproduce the results, the issues we faced and the discussion about possible future work that builds on it.
 
 ## Table of Contents  
 **[Introduction](#Introduction)**<br>
@@ -37,7 +37,7 @@ The contribution of Mora [^5] to the field of Computer Vision applied to tennis 
 
 <img src="./assets/tracking.png" width="640" height="360" title="tracking"/>
 
-The first logical step was to understand how to track the ball. The paper by Huang et al. [^2] introduces TrackNet, a deep learning network specifically designed for tracking high-speed and small objects in sports applications. This work addresses the challenges associated with tracking objects such as balls or players in fast-paced sports scenarios, where objects can be both small in size and rapidly moving.
+The first logical step was to understand how to track the ball. The paper by Huang et al. [^2] introduces TrackNet, a deep-learning network specifically designed for tracking high-speed and small objects in sports applications. This work addresses the challenges associated with tracking objects such as balls or players in fast-paced sports scenarios, where objects can be both small in size and rapidly moving.
 
 The second step was to find how we can track the players. Of course, all the iterations of the YOLO [^6] model were good candidates for our system, but we wanted to check if there are more task-specific models. While looking for a better alternative, we found a completely different solution proposed by Faulkner et al. [^4]. Instead of tracking the players and the ball with bounding boxes and later analyse their positions for getting insights, Faulkner *skipped* the step of tracking and went directly to action detection by analysing the frames of the video. Using this technique, they were able to perform frame classification, event detection and recognition and automatic commentary generation. Moreover, compared to most other papers, the dataset was publicly available and it was possible to reproduce the results.   
 
@@ -49,14 +49,13 @@ The second step was to find how we can track the players. Of course, all the ite
 
 ## Methodology
 
-In this section, we described our dataset together with the preprocessing steps, the splitting and the sampling technique used. Afterwards, we describe the models along with some implementation details. 
-<!-- I think we also need to name the real time performance we are looking for somewhere in the intro -->
-<!-- I wasn't sure what the end story would be. I put it for now that we were looking for "economical accesibility". -->
+In this section, we described our dataset together with the preprocessing steps used. Afterwards, we describe the models along with some implementation details. 
+
 ### Dataset
 The dataset created by Faulkner et al. is based on videos of official tennis matches. The dataset contains 5 videos of full tennis matches, corresponding to more than 200GB of frames. Given our computation power limitation, we chose to use only a single video, which resulted in around 80k frames.
 The frames are part of 11 classes, meaning 
 * the first letter describing: Serve or Hit, 
-* second letter: Far or Near, depending where the player is positioned in the frame 
+* second letter: Far or Near, depending on where the player is positioned in the frame 
 * last letter: has multiple options, explained in the figure:
  
  ![Classes](./assets/Labels.png)
@@ -95,7 +94,7 @@ The paper uses as a baseline a VGG16 architecture with a decreased number of neu
 ![VGG16 Architecture](./assets/VGG16-Architecture.png)
 
 ### Optical flow
-In the 2017 paper by Faulkner et al. they demonstrate that the inclusion of optical flow data increases their models' performance. The inclusion of motion information seems logically and empirically important for classification of tennis videos. However, the optical flow model FlowNet [^7] dates back to 2015 and is quite slow, not ideal for real-time calculation. Over the years much more efficient models have been created, namely PWC-net [^8] by Nvidia and RAFT [^9] are two strong competitors. We have opted to use the latter RAFT as there is an existing easy to use pretrained pytorch implementation.
+In the 2017 paper by Faulkner et al. they demonstrate that the inclusion of optical flow data increases their models' performance. The inclusion of motion information seems logical and empirically important for the classification of tennis videos. However, the optical flow model FlowNet [^7] dates back to 2015 and is quite slow, and not ideal for real-time calculation. Over the years much more efficient models have been created, namely PWC-net [^8] by Nvidia and RAFT [^9] are two strong competitors. We have opted to use the latter RAFT as there is an existing easy to use pretrained pytorch implementation.
 
 #### Two-Stream
 In addition to the pure optical flow model, Faulkner et al. also proposed a two-stream model, where a standard VGG16 model and an optical flow VGG16 model have their features joined as they are passed into the classifier part of VGG16. This model saw the greatest performance across the board, at the cost of doubling the number of parameters.
@@ -104,17 +103,15 @@ In addition to the pure optical flow model, Faulkner et al. also proposed a two-
 In order to make the process more affordable for everyone and maybe achieve real-time analysis, we had to integrate our system into a cheaper network that doesn't take as much time and resources to predict. A natural step towards this goal was knowledge distillation [^10]. Since VGG16 is known for its deep architecture, we wanted to use a smaller network, called MobileNet with around 5M parameters, compared to the more than 100M in VGG16. In order to perform knowledge distillation, we used the teacher-student training loop, illustrated below:
 
 ![Teacher-Student](./assets/teacher-student.png)
-<!-- TODO - Alex: Teacher-student with mobilenet_v3_large as student and VGG16 as teacher -->
-<!-- TODO: Big cumbersome network, make it smaller via student teacher or craft distillation
- -->
+
 
 #### Craft Distillation
-Another novel approach to model compression is craft distillation [^11], where a network is compressed layer by layer. A convolutional block (e.g. convolution + normalization + activation) is replaced by two or more separable convolution [^12] blocks. Eventhough a single block is replaced by two separable blocks, the number of parameters is still reduced. The distillation process is then as follows:
+Another novel approach to model compression is craft distillation [^11], where a network is compressed layer by layer. A convolutional block (e.g. convolution + normalization + activation) is replaced by two or more separable convolution [^12] blocks. Even though a single block is replaced by two separable blocks, the number of parameters is still reduced. The distillation process is then as follows:
 
 1. Select a convolutional block to replace
 2. Train a student block on the input and output features of the "teacher" block using a regression loss such as MSE.
 3. Replace the teacher with the student.
-4. Do fine-tuning on the entire model using the cross entropy loss
+4. Do fine-tuning on the entire model using the cross-entropy loss
 5. Repeat for the other convolutional blocks.
 
 ### Learning rate scheduling
@@ -124,7 +121,7 @@ During training the loss can vary wildly, possibly caused by gradient steps bein
 To determine the efficacy our proposed improvements to the TenniSet paper we first had to reproduce their results. However, shortly into the project we found out just how much storage and compute was required. The smallest video in the dataset, video 8, at 54 minutes in length and about 1 GiB in size ended up being over 20 GiB after frame extraction. This made it very difficult to run the experiments on Google Colab, and we had run the experiments locally. On our own hardware the training time of 1 model sometimes exceeded 7 hours. Thus, after the initial experiments we have limited ourselves to the base pre-trained VGG16 model due to memory and time constraints.
 
 ### Model Comparisons
-The results of the accuracy on the training and validation sets are found in the table below. We have also included the confusion matrices on the validation set of each model as heatmaps. From the results in the table below it can be observed that the base model has an accuracy of 50%, a 15 percentage point or 23% relative reduction w.r.t the reported accuracy by Faulkner et al. [^4]. Interestingly, the inclusion of optical flow data had a negative effect on classification performance. The optical flow model saw a 36% reduction in relative accuracy to the base model on the validation set, similar to only optimizing the classifier section of VGG16. Additionally, the two-stream model performed no better than the base VGG16 model. We hypothesise that the pre-trained weights in conjunction with the low amount of training data made it hard for the models to generalize much beyond their pre-trained performance, as similar to Faulkner et al. each component is optimized ore pre-trained before being joined for end-to-end training.
+The results of the accuracy on the training and validation sets are found in the table below. We have also included the confusion matrices on the validation set of each model as heatmaps. From the results in the table below it can be observed that the base model has an accuracy of 50%, a 15 percentage point or 23% relative reduction w.r.t the reported accuracy by Faulkner et al. [^4]. Interestingly, the inclusion of optical flow data had a negative effect on classification performance. The optical flow model saw a 36% reduction in relative accuracy to the base model on the validation set, similar to only optimizing the classifier section of VGG16. Additionally, the two-stream model performed no better than the base VGG16 model. We hypothesise that the pre-trained weights in conjunction with the low amount of training data made it hard for the models to generalize much beyond their pre-trained performance, as similar to Faulkner et al. each component is optimized or pre-trained before being joined for end-to-end training.
 
 <table>
     <thead>
@@ -168,7 +165,7 @@ The results of the accuracy on the training and validation sets are found in the
 </p>
 
 
-In the graphs below, it can be seen that for the base and two-stream models the training loss is converging to a local optimum, whereas the loss of the optical flow and classifier only models stagnates right from the start. This fact is also reflected in the validation accuracies. Our hypothesis for the behaviour of the optical flow model is similar to our previous hypothesis: the global optimum for the optical flow model is likely so far away from its current local optimum, induced by the pre-trained weights, that it is very hard to escape it with so little data.
+In the graphs below, it can be seen that for the base and two-stream models, the training loss is converging to a local optimum, whereas the loss of the optical flow and classifier-only models stagnates right from the start. This fact is also reflected in the validation accuracies. Our hypothesis for the behaviour of the optical flow model is similar to our previous hypothesis: the global optimum for the optical flow model is likely so far away from its current local optimum, induced by the pre-trained weights, that it is very hard to escape it with so little data.
 
 <p float="left">
   <img src="./assets/Models training loss.png" width="300" title="Models training loss" />
@@ -211,19 +208,16 @@ Unfortunately, after the first epoch, the loss increased to infinity and we coul
 
 There are a lot of factors that could have influenced this behaviour and we leave the fix of this issue as future work.  
 
-Likewise, the craft distillation lost all of its accuracy after just one epoch. In the confusion matrices below it can be seen that after one round of distillation all model outputs belonged to the two most prevalent classes. After the second layer had been distilled and refined the model fully collapsed to the most prevalent class.
+Likewise, craft distillation lost all of its accuracy after just one epoch. In the confusion matrices below it can be seen that after one round of distillation, all model outputs belonged to the two most prevalent classes. After the second layer had been distilled and refined the model fully collapsed to the most prevalent class.
 
 <p float="left">
   <img src="./assets/1 Layer Distilled - Validation Dataset Confusion Matrix.png" width="220" title="1 Layer Distilled - Validation Dataset Confusion Matrix" />
   <img src="./assets/2 Layers Distilled - Validation Dataset Confusion Matrix.png" width="220" title="2 Layers Distilled - Validation Dataset Confusion Matrix" />
 </p>
 
-<!-- ## Issues
-<!-- Maybe we can write these our experiments section? -->
-<!-- TODO: comparatively low computation power, runs taking very very long, lots of data so online is harder, running out of memory issues too -->
 
 ## Conclusion
-In conclusion, our efforts to reproduce and improve the results of the paper "TenniSet: A Dataset for dense Fine-Grained Event Recognition, Localisation and Description:" have not yielded the desired results. The baseline VGG16 model approached the accuracy stated in the paper at 77% of the stated classification accuracy. However, further iterations such as the inclusion of optical flow have had a negligent or in one case detrimental effect on the classification performance. These issues are likely caused by our limitations in training time as the erratic learning could not be stabilized by adjusting learning rate. Moreover, neither distillation methods yielded satisfactory results, knowledge distillation failed to learn anything and network distillation caused the model to collapse to a single output class.
+In conclusion, our efforts to reproduce and improve the results of the paper "TenniSet: A Dataset for dense Fine-Grained Event Recognition, Localisation and Description:" have not yielded the desired results. The baseline VGG16 model approached the accuracy stated in the paper at 77% of the stated classification accuracy. However, further iterations such as the inclusion of optical flow have had a negligent or in one case detrimental effect on the classification performance. These issues are likely caused by our limitations in training time as the erratic learning could not be stabilized by adjusting the learning rate. Moreover, neither distillation method yielded satisfactory results, knowledge distillation failed to learn anything and network distillation caused the model to collapse to a single output class.
 
 
 
