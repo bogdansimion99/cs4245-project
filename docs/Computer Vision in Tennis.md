@@ -60,7 +60,7 @@ The frames are part of 11 classes, meaning
 * second letter: Far or Near, depending where the player is positioned in the frame 
 * last letter: has multiple options, explained in the figure:
  
- ![Classes](./assets/tennis_cls.svg)
+ ![Classes](./assets/Labels.svg)
 
 
 <p float="left">
@@ -93,7 +93,7 @@ We note that the official repository has additional transformations that are not
 ### VGG16
 The paper uses as a baseline a VGG16 architecture with a decreased number of neurons for the last dense layer(256) and a single dense layer instead of two, since they claim it has no negative effect on the performance. Throughout the whole paper, the criterion used is the Cross-Entropy Loss. 
 
-![VGG16 Architecture](./assets/VGG16_Architecture.png)
+![VGG16 Architecture](./assets/VGG16-Architecture.png)
 
 ### Optical flow
 In the 2017 paper by Faulkner et al. they demonstrate that the inclusion of optical flow data increases their models' performance. The inclusion of motion information seems logically and empirically important for classification of tennis videos. However, the optical flow model FlowNet [^7] dates back to 2015 and is quite slow, not ideal for real-time calculation. Over the years much more efficient models have been created, namely PWC-net [^8] by Nvidia and RAFT [^9] are two strong competitors. We have opted to use the latter RAFT as there is an existing easy to use pretrained pytorch implementation.
