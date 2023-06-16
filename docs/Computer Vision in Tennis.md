@@ -145,6 +145,11 @@ From the graphs below it can be seen that none of the schedulers significantly r
 
 * StepLR (step_size = 1, gamma=0.1)
 
+![StepLR](./assets/StepvsBase.svg)
+
+![StepPolyBase](./assets/Stepvspolyvsbase.svg)
+
+
 
 GRAPHS OF TRAIN LOSS AND VAL ACCURACY (ALMOST FINISHED RUNNING)
 
