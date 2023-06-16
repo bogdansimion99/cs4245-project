@@ -7,116 +7,225 @@
 #### Bogdan Simion: 5850185
 #### Onno Verberne: 5883407
              
+
 #### This project was done in part to satisfy the requirements for the Seminar Computer Vision by Deep Learning course at TU Delft.
-#### We aim to reproduce and to improve some parts of the paper "TenniSet: A Dataset for Dense Fine-Grained Event Recognition, Localisation and Description". In this blog we’ll be elaborating on our efforts to reproduce the results, the issues we faced and the discussion about the possibility of reproducing the paper.
+----
+
+We aim to reproduce and to improve some parts of the paper "TenniSet: A Dataset for Dense Fine-Grained Event Recognition, Localisation and Description". In this blog we’ll be elaborating on our efforts to reproduce the results, the issues we faced and the discussion about possible future work that builds on it.
 
 ## Table of Contents  
 **[Introduction](#Introduction)**<br>
 **[Previous work](#Previous-work)**<br>
-**[Project goals](#Project-goals)**<br>
 **[Methodology](#Methodology)**<br>
-**[Results](#Results)**<br>
-**[Issues](#Issues)**<br>
-**[Discussions](#Discussions)**<br>
+**[Experiments & Results](#Experiments&Results)**<br>
+**[Conclusion](#Conclusion)**<br>
 
 ## Introduction
 
-#### Tennis, similar to every other field that has benefited from technology, has experienced significant advancements. Since Hawk-Eye developement [^1] many algorithms detecting the players' action, the score and tracking the ball were made. Some of the recent improvements in the field were encompassed by TrackNet [^2], which trains a deep learning network, addressing the problem of tracking fast moving tiny objects and Optical Flow [^3], a currently widely used technique for detecting moving objects. In terms of datasets, an important advancement was made by Faulkner and Dick [^4], who created the TenniSet, a dataset focused on event detection based on the players movements and ball's position. However, there are some flaws: the slow computation time makes it impossible to use these approaches for any real-time analysis of a tennis match. Furthermore, these techniques are not yet cheap and viable ways to create an annotated dataset that could be further used in research. Thus, we successfully some parts of the TenniSet paper as well as providing a new, faster approach for handling real-time tennis annotation. Last but not least, we would like to divide our discussion into several parts: the previous work related to annotation using computer vision in sports; our project goals and what we are trying to implement; the results we have for this setting and in the end, the discussion about the results and issues we faced.
+
+In the world of sports, technological advancements have brought about remarkable changes, captivating players and spectators alike. From the introduction of Video Assistant Referee (VAR) in football to the groundbreaking Hawk-Eye system in tennis, the possibilities for leveraging technology in sports seem boundless. These advancements have opened doors to exciting applications that benefit players, coaches, and enthusiasts. In particular, tennis has witnessed the emergence of Hawk-Eye, a computer vision system that automates refereeing by precisely tracking the ball's trajectory using an array of sophisticated cameras. On top of its immediate use to help umpires make better decisions, the system also creates a huge and up-to-date dataset that can improve the game in multiple directions.  However, despite the potential for this data to bridge the gap between players of different economic backgrounds, they have, unfortunately, only served to magnify it, in the sense that the richest players in the world afford to analyse it and get an almost unfair advantage against emerging players.
+
+![Federer's Serve Analysis](./assets/fede.png)
+
+Therefore, our goal is to explore the open-source research related to Computer Vision in tennis, understand its shortcomings and replicate the most promising work while keeping the idea of economic accessibility in mind throughout the whole project.
 
 ## Previous work
 
-#### One of the first groundbreaking innovations in terms of technologies used is Hawk-Eye [^1]. The Hawk-eye tennis system is a cutting-edge technology designed to enhance decision-making in tennis matches. By utilizing advanced image processing techniques and sophisticated algorithms, Hawk-eye can accurately track the trajectory of the ball during gameplay. The system employs a network of high-speed cameras strategically positioned around the court to capture multiple angles of the ball's movement. The Hawk-eye technology has revolutionized the game of tennis by providing players, officials, and spectators with real-time, accurate information on ball placement. It has become a valuable tool in resolving disputed calls, as it allows officials to review and make more informed decisions on whether the ball landed in or out of bounds. The system's ability to provide quick and objective insights has greatly enhanced the fairness and integrity of the sport.
+From the outset of our project, we recognized that the scope of our work would heavily rely on acquiring timely and relevant data. As a result, our initial literature review focused specifically on papers that provided publicly available data, in order to identify research that could be reproduced. This process led us to a disheartening realization: open-source tennis research has stagnated due to a profound lack of high-quality data accessible for scholarly investigation. It became apparent that the complexity of projects undertaken by commercial entities far surpassed the capabilities of the open-source research community. Supporting our hypothesis, Mora [^5] eloquently elaborates on this issue in her paper, shedding light on the scarcity of data for open-source tennis research and the challenges posed by its low quality and limited scale. This compelling evidence solidifies the urgent need to address the data deficit in order to propel open-source tennis research forward.
 
-#### The paper by Vinyes Mora [^5] presents a comprehensive framework for in-play tennis analysis using computer vision and machine learning techniques. This work builds upon previous research in the field of sports analysis, specifically focusing on real-time analysis of tennis matches. The author proposes a novel framework that combines computer vision algorithms and machine learning methodologies to extract meaningful insights from visual data obtained during live tennis matches. The paper contributes to the existing body of literature by presenting a detailed description of the framework and its underlying algorithms. It highlights the importance of computer vision techniques such as object detection, motion tracking, and player tracking, as well as the role of machine learning algorithms for classification and prediction tasks. The proposed framework offers an innovative approach to analyzing in-play tennis events, providing a deeper understanding of player movements, shot recognition, and other relevant aspects of the game.
+The contribution of Mora [^5] to the field of Computer Vision applied to tennis is significant. She presents a comprehensive framework for in-play tennis analysis using computer vision for object detection, motion tracking, and player tracking. Using these techniques, the system offered an innovative approach to analyzing in-play tennis events, providing a deeper understanding of player movements, shot recognition, and other relevant aspects of the game. Afterwards, we explored how we can also achieve the same results and maybe even improve them by using the more recent developments in the field.
 
-#### The paper by Huang et al. [^2] introduces TrackNet, a deep learning network specifically designed for tracking high-speed and small objects in sports applications. This work addresses the challenges associated with tracking objects such as balls or players in fast-paced sports scenarios, where objects can be both small in size and rapidly moving. The authors present TrackNet as a novel solution that combines the power of deep learning with specialized techniques for tracking objects in sports. The network architecture is designed to effectively handle the complexities of tracking high-speed objects by incorporating features such as motion prediction, object recognition, and temporal modeling.
+<img src="./assets/tracking.png" width="640" height="360" title="tracking"/>
 
-#### Faulkner et. al [^4] created a database of annotated tennis matches for automatic tennis commentary generation, called TenniSet. It is designed to encompass a wide range of tennis-specific events, enabling researchers and practitioners to develop and evaluate algorithms and models for event recognition and understanding. It includes detailed annotations for various events that occur during a tennis match, such as serves, volleys, forehands, backhands, and other distinct actions and movements. The dataset provides dense annotations, meaning that it offers precise temporal and spatial information about the occurrences of different events. This level of granularity allows for more nuanced and accurate event recognition and localization. Additionally, the Tenniset dataset includes textual descriptions of the events, providing valuable context and aiding in comprehensive event understanding.
+The first logical step was to understand how to track the ball. The paper by Huang et al. [^2] introduces TrackNet, a deep learning network specifically designed for tracking high-speed and small objects in sports applications. This work addresses the challenges associated with tracking objects such as balls or players in fast-paced sports scenarios, where objects can be both small in size and rapidly moving.
 
-## Project goals
+The second step was to find how we can track the players. Of course, all the iterations of the YOLO [^6] model were good candidates for our system, but we wanted to check if there are more task-specific models. While looking for a better alternative, we found a completely different solution proposed by Faulkner et al. [^4]. Instead of tracking the players and the ball with bounding boxes and later analyse their positions for getting insights, Faulkner *skipped* the step of tracking and went directly to action detection by analysing the frames of the video. Using this technique, they were able to perform frame classification, event detection and recognition and automatic commentary generation. Moreover, compared to most other papers, the dataset was publicly available and it was possible to reproduce the results.   
 
-#### We aim to reproduce some parts of the Computer Vision algorithms presented in [^3], namely event detection and recognition as well as providing a new approach. To improve the performance of tennis annotation we propose adding an optical flow component to the network which will serve as a secondary input to the annotation network. To address the computational costs of optical flow calculations we propose two methods. The first one is frame interpolation, designed in "RIFE: Real-Time Intermediate Flow Estimation for Video Frame Interpolation", where we use a network to calculate the intermediate optical flow frames. The paper here uses network distillation to improve the performance of an existing optical flow frame interpolation network. The second one is network distillation, designed in "Craft Distillation: Layer-wise Convolutional Neural Network Distillation". Our goal is to distill an existing optical flow network layer by layer using Craft Distillation.
 
-#### In order to make sure that we were right about what is missing and that our proposed solution is feasible, we start by reproducing the results obtained by Faulkner et. al. Afterwards, we try to see if their solution generalizes to unseen videos of official tennis matches. To test our proposed solution, we use the same dataset and analyse our newly trained models from different perspectives including accuracy and training time.  
+
+<!-- Information on optical flow models -->
+
+
 
 ## Methodology
 
-#### In this section we would like to discuss the algorithms used in our implementation, along with the necessary explanations.
+In this section, we described our dataset together with the preprocessing steps, the splitting and the sampling technique used. Afterwards, we describe the models along with some implementation details. 
+<!-- I think we also need to name the real time performance we are looking for somewhere in the intro -->
+<!-- I wasn't sure what the end story would be. I put it for now that we were looking for "economical accesibility". -->
+### Dataset
+The dataset created by Faulkner et al. is based on videos of official tennis matches. The dataset contains 5 videos of full tennis matches, corresponding to more than 200GB of frames. Given our computation power limitation, we chose to use only a single video, which resulted in around 80k frames.
+The frames are part of 11 classes, meaning 
+* the first letter describing: Serve or Hit, 
+* second letter: Far or Near, depending where the player is positioned in the frame 
+* last letter: has multiple options, explained in the figure:
+ 
+ ![Classes](./assets/Labels.png)
 
-### Creating the dataset
-
-#### First of all, we need to convert from video to frames using Python's specialized computer vision library: OpenCV. We set to have 50 frames per second as this number was the most compatible with all the algorithms used in our implementation. In short, it reads each frame of the video, checks for any errors in frame reading, and saves the valid frames as individual image files. The total count of saved frames is then printed. After creating the images, we need to save them into a more organised dataset. Therefore, we created TennisDataset for working with tennis-related image data and it is designed to be compatible with PyTorch's dataset interface. One throwback we saw during training is that the classes are imbalanced, so we undersampled the dataset to address this. Undersampling involves reducing the number of instances of the most frequent class to match the frequency of the second most frequent class.
-
-#### In total, there are 11 labels we assign to the frames, and they are explained better in the following screenshot from the Tenniset [^4] Github page.
-
-![Labels](./assets/Labels.png)
-
-#### For a better insight, we will show below a sample from every label. Note that the OTH label is by far the most frequent label, counting for more than 80% of all images. The labels are, in order: OTH, SFI, SFF, SFL, SNI, SNF, SNL, HFL, HFR, HNL and respectively HNR.
-
-<!-- ![OTH](./assets/1783.png | width = 50)
-![SFI](./assets/11161.png | width = 50)
-![SFF](./assets/10871.png | width = 50)
-![SFL](./assets/13024.png | width = 50)
-![SNI](./assets/1967.png | width = 50)
-![SNF](./assets/6815.png | width = 50)
-![SNL](./assets/30021.png | width = 50)
-![HFL](./assets/2777.png | width = 50)
-![HFR](./assets/2004.png | width = 50)
-![HNL](./assets/2090.png | width = 50)
-![HNR](./assets/2025.png | width = 50) -->
-
-<!-- <img src="./assets/1783.png" width="400">
-<img src="./assets/1783.png" width="400"> -->
 
 <p float="left">
-  <img src="./assets/1783.png" width="220" />
-  <img src="./assets/11161.png" width="220" /> 
-  <img src="./assets/10871.png" width="220" />
-  <img src="./assets/13024.png" width="220" />
-  <img src="./assets/1967.png" width="220" /> 
-  <img src="./assets/6815.png" width="220" />
-  <img src="./assets/30021.png" width="220" />
-  <img src="./assets/2777.png" width="220" /> 
-  <img src="./assets/2004.png" width="220" />
-  <img src="./assets/2090.png" width="220" />
-  <img src="./assets/2025.png" width="220" /> 
+  <img src="./assets/1783.png" width="220" title="OTH" />
 </p>
 
+<p float="left">
+  <img src="./assets/11161.png" width="220" title="SFI"/> 
+  <img src="./assets/10871.png" width="220" title="SFF"/>
+  <img src="./assets/13024.png" width="220" title="SFL"/>
+  <img src="./assets/1967.png" width="220" title="SNI"/> 
+  <img src="./assets/6815.png" width="220" title="SNF"/>
+  <img src="./assets/30021.png" width="220" title="SNL"/>
+</p>
+
+<p float="left">
+  <img src="./assets/2777.png" width="220" title="HFL"/> 
+  <img src="./assets/2004.png" width="220" title="HFR"/>
+  <img src="./assets/2090.png" width="220" title="HNL"/>
+  <img src="./assets/2025.png" width="220" title="HNR"/> 
+</p>
+
+In order to improve the performance of the model we performed the following transformations, as explained in the paper.
+* Center Crop (as most information is in the middle of the frame)
+* Resizing to 512x512
+* Mean subtraction
+
+We note that the official repository has additional transformations that are not presented in the paper that might have influenced the presented accuracies.
+
 ### VGG16
+The paper uses as a baseline a VGG16 architecture with a decreased number of neurons for the last dense layer(256) and a single dense layer instead of two, since they claim it has no negative effect on the performance. Throughout the whole paper, the criterion used is the Cross-Entropy Loss. 
 
-#### The VGG16 architecture consists of a series of convolutional layers, followed by fully connected layers. It is named "VGG16" because it has 16 weight layers, including 13 convolutional layers and 3 fully connected layers. The convolutional layers are designed to extract hierarchical features from the input images, while the fully connected layers act as a classifier to predict the class labels.
+![VGG16 Architecture](./assets/VGG16-Architecture.png)
 
-#### Each convolutional layer in VGG16 applies a set of learnable filters to the input image. These filters capture different aspects of the image, such as edges, textures, and shapes. The filters are small in spatial dimension but extend across the full depth of the input volume, enabling the model to learn rich spatial representations.
+### Optical flow
+In the 2017 paper by Faulkner et al. they demonstrate that the inclusion of optical flow data increases their models' performance. The inclusion of motion information seems logically and empirically important for classification of tennis videos. However, the optical flow model FlowNet [^7] dates back to 2015 and is quite slow, not ideal for real-time calculation. Over the years much more efficient models have been created, namely PWC-net [^8] by Nvidia and RAFT [^9] are two strong competitors. We have opted to use the latter RAFT as there is an existing easy to use pretrained pytorch implementation.
 
-#### In VGG16, the convolutional layers are stacked on top of each other, with occasional max pooling layers in between. The max pooling layers downsample the spatial dimensions of the feature maps, reducing the computational complexity and increasing the receptive field of the subsequent layers.
+#### Two-Stream
+In addition to the pure optical flow model, Faulkner et al. also proposed a two-stream model, where a standard VGG16 model and an optical flow VGG16 model have their features joined as they are passed into the classifier part of VGG16. This model saw the greatest performance across the board, at the cost of doubling the number of parameters.
 
-#### The fully connected layers in VGG16 take the output of the last convolutional layer, flatten it into a 1-dimensional vector, and process it through a series of densely connected layers. The final fully connected layer produces the output predictions by employing a softmax activation function, which assigns probabilities to each class label.
+### Knowledge Distillation
+In order to make the process more affordable for everyone and maybe achieve real-time analysis, we had to integrate our system into a cheaper network that doesn't take as much time and resources to predict. A natural step towards this goal was knowledge distillation [^10]. Since VGG16 is known for its deep architecture, we wanted to use a smaller network, called MobileNet with around 5M parameters, compared to the more than 100M in VGG16. In order to perform knowledge distillation, we used the teacher-student training loop, illustrated below:
 
-#### During the training phase, VGG16 is typically trained using the backpropagation algorithm with gradient descent optimization. The weights of the network are updated iteratively to minimize a loss function, such as categorical cross-entropy, by comparing the predicted probabilities with the ground truth labels.
+![Teacher-Student](./assets/teacher-student.png)
+<!-- TODO - Alex: Teacher-student with mobilenet_v3_large as student and VGG16 as teacher -->
+<!-- TODO: Big cumbersome network, make it smaller via student teacher or craft distillation
+ -->
 
-![VGG16 Architecture](./assets/VGG16_Architecture.png)
+#### Craft Distillation
+Another novel approach to model compression is craft distillation [^11], where a network is compressed layer by layer. A convolutional block (e.g. convolution + normalization + activation) is replaced by two or more separable convolution [^12] blocks. Eventhough a single block is replaced by two separable blocks, the number of parameters is still reduced. The distillation process is then as follows:
 
-### Optical Flow
+1. Select a convolutional block to replace
+2. Train a student block on the input and output features of the "teacher" block using a regression loss such as MSE.
+3. Replace the teacher with the student.
+4. Do fine-tuning on the entire model using the cross entropy loss
+5. Repeat for the other convolutional blocks.
 
-#### Optical flow refers to the pattern of apparent motion of objects in a sequence of images or video frames. It provides valuable information about the movement of objects and can be used for various computer vision tasks, such as object tracking, motion analysis, and video stabilization. To compute optical flow, we leverage the assumption that pixel intensities of objects in consecutive frames tend to remain constant unless affected by motion. Based on this assumption, several algorithms have been developed to estimate the motion vectors of pixels between frames.
+### Learning rate scheduling
+During training the loss can vary wildly, possibly caused by gradient steps being too large. To combat this issue we opted to use four different learning rate schedulers: Step-wise, Linear, Reduce on pleateau, and Cosine Annealing With Warm Restarts [^13]. The linear scheduler is chosen as it starts with a lower learning rate which anneals over time. Starting slower could prevent the model from overshooting the local optimum induced by the pre-trained weights. By the same token, cosine annealing with warm restarts has been shown to increase the convergence speed of deep CNNs and could help reduce the training loss variance over time.
 
-#### More recently, deep learning-based methods have been developed to estimate optical flow. These approaches utilize convolutional neural networks (CNNs) to learn complex motion patterns and capture long-range dependencies. Networks like FlowNet and PWC-Net have achieved state-of-the-art performance in optical flow estimation by training on large-scale annotated datasets. In our study, we use optical flow as a key component in our methodology to analyze and track the motion of players and tennis balls in our tennis dataset.
+## Experiments & Results
+To determine the efficacy our proposed improvements to the TenniSet paper we first had to reproduce their results. However, shortly into the project we found out just how much storage and compute was required. The smallest video in the dataset, video 8, at 54 minutes in length and about 1 GiB in size ended up being over 20 GiB after frame extraction. This made it very difficult to run the experiments on Google Colab, and we had run the experiments locally. On our own hardware the training time of 1 model sometimes exceeded 7 hours. Thus, after the initial experiments we have limited ourselves to the base pre-trained VGG16 model due to memory and time constraints.
 
-![Optical Flow Architecture](./assets/Optical_Flow_Architecture.png)
+### Model Comparisons
+The results of the accuracy on the training and validation sets are found in the table below. We have also included the confusion matrices on the validation set of each model as heatmaps. From the results in the table below it can be observed that the base model has an accuracy of 50%, a 15 percentage point or 23% relative reduction w.r.t the reported accuracy by Faulkner et al. [^4]. Interestingly, the inclusion of optical flow data had a negative effect on classification performance. The optical flow model saw a 36% reduction in relative accuracy to the base model on the validation set, similar to only optimizing the classifier section of VGG16. Additionally, the two-stream model performed no better than the base VGG16 model. We hypothesise that the pre-trained weights in conjunction with the low amount of training data made it hard for the models to generalize much beyond their pre-trained performance, as similar to Faulkner et al. each component is optimized ore pre-trained before being joined for end-to-end training.
+
+<table>
+    <thead>
+      <tr>
+        <th></th>
+        <th colspan="2">Ours</th>
+        <th>Faulkner et al.</th>
+      </tr>
+      <tr>
+        <th></th>
+        <th>Train accuracy</th>
+        <th>Test accuracy</th>
+        <th>Test accuracy</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Base E2E</td>
+            <td>58.96%</td><td>50.36%</td><td>67.48%</td>
+        </tr>
+        <tr>
+            <td>Base Classifier-only</td>
+            <td>30.69%</td><td>28.91%</td><td>-</td>
+        </tr>
+        <tr>
+            <td>Optical Flow E2E</td>
+            <td>32.64%</td><td>27.60%</td><td>76.07%</td>
+        </tr>
+        <tr>
+            <td>Two-Stream E2E</td>
+            <td>73.15%</td><td>52.33%</td><td>81.57%</td>
+        </tr>
+    </tbody>
+</table>
+
+<p float="left">
+  <img src="./assets/Base E2E - Test Dataset Confusion Matrix.png" width="300" title="Base E2E - Test Dataset Confusion Matrix" />
+  <img src="./assets/Base Classifier-only - Test Dataset Confusion Matrix.png" width="300" title="Base Classifier-only - Test Dataset Confusion Matrix" />
+  <img src="./assets/Optical flow E2E - Test Dataset Confusion Matrix.png" width="300" title="Base E2E - Test Dataset Confusion Matrix" />
+  <img src="./assets/Two-Stream E2E - Test Dataset Confusion Matrix.png" width="300" title="Base E2E - Test Dataset Confusion Matrix" />
+</p>
+
+
+In the graphs below, it can be seen that for the base and two-stream models the training loss is converging to a local optimum, whereas the loss of the optical flow and classifier only models stagnates right from the start. This fact is also reflected in the validation accuracies. Our hypothesis for the behaviour of the optical flow model is similar to our previous hypothesis: the global optimum for the optical flow model is likely so far away from its current local optimum, induced by the pre-trained weights, that it is very hard to escape it with so little data.
+
+<p float="left">
+  <img src="./assets/Models training loss.png" width="300" title="Models training loss" />
+  <img src="./assets/Models validation accuracy.png" width="300" title="Models validation accuracy" />
+</p>
+
+Furthermore, the high variance in the training loss stood out to us, we conjectured two causes for this. Firstly, the class imbalance causes the model to overfit on the more prevalent classes, as a novel class sample will then cause the loss to greatly increase. Secondly, we propose that the learning rate requires more tuning as the variance in training losses could indicate that the gradient steps are too large.
+
+### Learning rate scheduling
+From the graphs below it can be seen that none of the schedulers significantly reduce the variance in the training loss, thus disproving our learning rate hypothesis. Although an initial boost in validation performance is observed, the base model outperforms every scheduler after five epochs.
+
+We started by using a simple technique, called StepLR, for its increased explainability, in the sense that after each epoch the learning rate decreases at a constant rate. However, since our training loop only uses 5 epochs to train, we thought the decrease is too slow to solve the instability in the training loss. Therefore, we also tried some other techniques, but none of them solved the problem.
+
+* Cosine Annealing with Warm Restarts T_0=1, T_mult=2
+* StepLR (step_size = 1, gamma=0.1)
+
+* LinearLR (start_factor = 0.33, end_factor=1.0)
+
+<p float="left">
+  <img src="./assets/LR training loss.png" width="300" title="LR Schedulers training loss" />
+  <img src="./assets/LR validation accuracy.png" width="300" title="LR Schedulers validation accuracy" />
+</p>
+
+* PolynomialLR (Power = 2)
+
+ <img src="./assets/PolynomialvsBase.svg" width="500" height="250" title="PolynomialLR"/> 
+
+
+* StepLR (step_size = 1, gamma=0.1)
+
+<img src="./assets/StepvsBase.svg" width="500" height="250" title="StepLR"/> 
+
+<img src="./assets/Stepvspolyvsbase.svg" width="500" height="250" title="StepPolyBase"/> 
+
 
 ### Network Distillation
+Network distillation yielded no positive results. In order to measure the performance of the knowledge distillation approach, we first trained the MobileNet network with the same settings as the base VGG. Afterwards, we trained the same architecture with the teacher-student method. 
+Unfortunately, after the first epoch, the loss increased to infinity and we could not fix the issue:
+<img src="./assets/Knowledge_loss_tr.svg" width="500" height="250" title="Knowledge_distill"/> 
 
-## Results
+There are a lot of factors that could have influenced this behaviour and we leave the fix of this issue as future work.  
 
-#### a
+Likewise, the craft distillation lost all of its accuracy after just one epoch. In the confusion matrices below it can be seen that after one round of distillation all model outputs belonged to the two most prevalent classes. After the second layer had been distilled and refined the model fully collapsed to the most prevalent class.
 
-## Issues
+<p float="left">
+  <img src="./assets/1 Layer Distilled - Validation Dataset Confusion Matrix.png" width="220" title="1 Layer Distilled - Validation Dataset Confusion Matrix" />
+  <img src="./assets/2 Layers Distilled - Validation Dataset Confusion Matrix.png" width="220" title="2 Layers Distilled - Validation Dataset Confusion Matrix" />
+</p>
 
-#### Imbalanced classes
+<!-- ## Issues
+<!-- Maybe we can write these our experiments section? -->
+<!-- TODO: comparatively low computation power, runs taking very very long, lots of data so online is harder, running out of memory issues too -->
 
-## Discussion
+## Conclusion
+In conclusion, our efforts to reproduce and improve the results of the paper "TenniSet: A Dataset for dense Fine-Grained Event Recognition, Localisation and Description:" have not yielded the desired results. The baseline VGG16 model approached the accuracy stated in the paper at 77% of the stated classification accuracy. However, further iterations such as the inclusion of optical flow have had a negligent or in one case detrimental effect on the classification performance. These issues are likely caused by our limitations in training time as the erratic learning could not be stabilized by adjusting learning rate. Moreover, neither distillation methods yielded satisfactory results, knowledge distillation failed to learn anything and network distillation caused the model to collapse to a single output class.
 
-#### a
+
 
 ## References
 
@@ -125,6 +234,11 @@
 [^3]: Dosovitskiy, A., Fischer, P., Ilg, E., Hausser, P., Hazirbas, C., Golkov, V., ... & Brox, T. (2015). Flownet: Learning optical flow with convolutional networks. In Proceedings of the IEEE international conference on computer vision (pp. 2758-2766).
 [^4]: Faulkner, H., & Dick, A. (2017, November). Tenniset: a dataset for dense fine-grained event recognition, localisation and description. In 2017 International Conference on Digital Image Computing: Techniques and Applications (DICTA) (pp. 1-8). IEEE.
 [^5]: Mora, Silvia Vinyes. Computer Vision and Machine Learning for In-Play Tennis Analysis: Framework, Algorithms and Implementation. Diss. Imperial College London, 2018.
-
-
-
+[^6]: J. Redmon, S. Divvala, R. Girshick and A. Farhadi, "You Only Look Once: Unified, Real-Time Object Detection," 2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), Las Vegas, NV, USA, 2016, pp. 779-788, doi: 10.1109/CVPR.2016.91.
+[^7]: Dosovitskiy, A., Fischer, P., Ilg, E., Häusser, P., Hazirbas, C., Golkov, V., van der Smagt, P., Cremers, D., & Brox, T. (2015). FlowNet: Learning Optical Flow with Convolutional Networks. 2015 IEEE International Conference on Computer Vision (ICCV), 2758-2766.
+[^8]: Sun, D., Yang, X., Liu, M., & Kautz, J. (2017). PWC-Net: CNNs for Optical Flow Using Pyramid, Warping, and Cost Volume. 2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition, 8934-8943.
+[^9]: Teed, Z., & Deng, J. (2020). RAFT: Recurrent All-Pairs Field Transforms for Optical Flow. European Conference on Computer Vision.
+[^10]: Hinton, G., Vinyals, O., & Dean, J. (2015). Distilling the knowledge in a neural network. arXiv preprint arXiv:1503.02531.
+[^11]: C. Blakeney, X. Li, Y. Yan and Z. Zong, "Craft Distillation: Layer-wise Convolutional Neural Network Distillation," 2020 7th IEEE International Conference on Cyber Security and Cloud Computing (CSCloud)/2020 6th IEEE International Conference on Edge Computing and Scalable Cloud (EdgeCom), New York, NY, USA, 2020, pp. 252-257, doi: 10.1109/CSCloud-EdgeCom49738.2020.00051.
+[^12]: Guo, Y., Li, Y., Feris, R.S., Wang, L., & Simunic, T. (2019). Depthwise Convolution is All You Need for Learning Multiple Visual Domains. AAAI Conference on Artificial Intelligence.
+[^13]: Loshchilov, I., & Hutter, F. (2016). SGDR: Stochastic Gradient Descent with Restarts. ArXiv, abs/1608.03983.
