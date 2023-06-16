@@ -153,7 +153,13 @@ From the graphs below it can be seen that none of the schedulers significantly r
 GRAPHS OF TRAIN LOSS AND VAL ACCURACY (ALMOST FINISHED RUNNING)
 
 ### Network Distillation
-Network distillation yielded no positive results. [@Alexandru you can put your results on teacher-student here]. Likewise, the craft distillation lost all of its accuracy after just one epoch. In the confusion matrices below it can be seen that after one round of distillation all model outputs belonged to the two most prevalent classes. After the second layer had been distilled and refined the model only output the most prevalent class.
+Network distillation yielded no positive results. In order to measure the performance of the knowledge distillation approach, we first trained the MobileNet network with the same settings as the base VGG. Afterwards, we trained the same architecture with the teacher-student method. 
+Unfortunately, after the first epoch, the loss increased to infinity and we could not fix the issue:
+<img src="./assets/Knowledge_loss_tr.svg" width="300" height="150" title="Knowledge_distill"/> 
+
+There are a lot of factors that could have influenced this behaviour and we leave the fix of this issue as future work.  
+
+Likewise, the craft distillation lost all of its accuracy after just one epoch. In the confusion matrices below it can be seen that after one round of distillation all model outputs belonged to the two most prevalent classes. After the second layer had been distilled and refined the model only output the most prevalent class.
 
 HEATMAP OF CONFUSION MATRIX
 
